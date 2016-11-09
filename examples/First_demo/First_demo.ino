@@ -26,7 +26,7 @@ int buttonPin = 3;
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 WiFiClient ethClient;
-PubSubClient client(mqttServer, 1883, callback, ethClient);  
+PubSubClient pubsub(mqttServer, 1883, callback, ethClient);  
 
 
 void setup() {
@@ -59,7 +59,7 @@ void setup() {
     while(!Device.Connect(&ethClient, httpServer))                // connect the device with the IOT platform.
 		Serial.println("retrying");
 	Device.AddAsset(buttonPin, "button", "a push button", false, "boolean");   // Create the Digital Actuator asset for your device
-	while(!Device.Subscribe(pubSub))                              // make certain that we can receive message from the iot platform (activate mqtt)
+	while(!Device.Subscribe(pubsub))                              // make certain that we can receive message from the iot platform (activate mqtt)
 		Serial.println("retrying");
 }
 
