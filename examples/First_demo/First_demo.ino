@@ -21,11 +21,7 @@ ATTDevice Device(DEVICEID, CLIENTID, CLIENTKEY);            //create the object 
 char httpServer[] = "api.smartliving.io";                   // HTTP API Server host                  
 char mqttServer[] = "broker.smartliving.io";                // MQTT Server Address 
 
-
-int knobPin = A0;                                      // Analog 0 is the input pin
 int buttonPin = 3;                                       
-int button_TopicID= 5;                                    // identifies the asset on the cloud platform
-int knob_TopicID=0;                                    // identifies the asset on the cloud platform
 
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -35,7 +31,6 @@ PubSubClient client(mqttServer, 1883, callback, ethClient);
 
 void setup() {
     pinMode(buttonPin, INPUT);                      // initialize the digital pin as an output.
-    pinMode(knobPin, INPUT);                        // initialize the Analog pin as an intput.
 
     /* the power supply of Grove sockets is controlled by a MOSFET switch which is gated by GPIO 15. 
     * So you must pull up GPIO 15 in your Arduino sketch to power on the Grove system: 
@@ -61,31 +56,26 @@ void setup() {
         delay(5000);
     }
     
-    //On nodemcu, creating assets from the device takes too long for the built in watchdog. This can give startup issues. It will usually work eventually, but the process takes very long.
-    //best to create the assets from the platform (manually or from a template)
-        
-    Device.Subscribe(client);                               // make certain that we can receive message from the iot platform (activate mqtt)
+    while(!Device.Connect(&ethClient, httpServer))                // connect the device with the IOT platform.
+		Serial.println("retrying");
+	Device.AddAsset(buttonPin, "button", "a push button", false, "boolean");   // Create the Digital Actuator asset for your device
+	while(!Device.Subscribe(pubSub))                              // make certain that we can receive message from the iot platform (activate mqtt)
+		Serial.println("retrying");
 }
 
 unsigned long timer;                                            //only send every x amount of time.
-unsigned int prevVal = 0;
 unsigned int prevVal2 = 0;
 void loop()
 {
     unsigned long curTime = millis();
     if (curTime > (timer + 1000))                               // publish light reading every 5 seconds to sensor 1
     {
-        unsigned int knobRead = analogRead(knobPin);            // read from light sensor (photocell)
-        if(prevVal != knobRead){
-            Device.Send(String(knobRead), knob_TopicID);
-            prevVal = knobRead;
-        }
         unsigned int buttonRead = digitalRead(buttonPin);       // read from light sensor (photocell)
         if(prevVal2 != buttonRead){
             if(buttonRead == 0)
-                Device.Send("false", button_TopicID);
+                Device.Send("false", buttonPin);
             else 
-                Device.Send("true", button_TopicID);
+                Device.Send("true", buttonPin);
             prevVal2 = buttonRead;
         }
         timer = curTime;
