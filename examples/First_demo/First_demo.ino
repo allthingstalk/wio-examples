@@ -3,7 +3,7 @@
 #include <ATT_IOT.h>              //AllThingsTalk IoT library
 #include <SPI.h>                  //required to have support for signed/unsigned long type..
 #include "keys.h"                 // Keep all your personal account information in a seperate file
-#include "Time.h"
+
 
 //needed for library
 #include <DNSServer.h>
@@ -21,7 +21,7 @@ ATTDevice Device(DEVICEID, CLIENTID, CLIENTKEY);            //create the object 
 char httpServer[] = "api.smartliving.io";                   // HTTP API Server host                  
 char mqttServer[] = "broker.smartliving.io";                // MQTT Server Address 
 
-int buttonPin = 3;                                       
+int buttonPin = 5;  // (D1)                                     
 
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -37,6 +37,7 @@ void setup() {
     */
     pinMode(15, OUTPUT);
     digitalWrite(15, 1);
+    
     pinMode(TRIGGER_PIN, INPUT);                    //the trigger pin is used to reset the wifi at boot (press the button to reset)
   
     Serial.begin(115200);
@@ -57,30 +58,24 @@ void setup() {
     }
     
     while(!Device.Connect(&ethClient, httpServer))                // connect the device with the IOT platform.
-		Serial.println("retrying");
-	Device.AddAsset(buttonPin, "button", "a push button", false, "boolean");   // Create the Digital Actuator asset for your device
-	while(!Device.Subscribe(pubsub))                              // make certain that we can receive message from the iot platform (activate mqtt)
-		Serial.println("retrying");
+       Serial.println("retrying");
+    Device.AddAsset(buttonPin, "button", "a push button", false, "boolean");   // Create the Digital Actuator asset for your device
+    while(!Device.Subscribe(pubsub))                              // make certain that we can receive message from the iot platform (activate mqtt)
+       Serial.println("retrying");
 }
-
-unsigned long timer;                                            //only send every x amount of time.
-unsigned int prevVal2 = 0;
+                                           
+unsigned int prevVal = 0;
 void loop()
 {
-    unsigned long curTime = millis();
-    if (curTime > (timer + 1000))                               // publish light reading every 5 seconds to sensor 1
-    {
-        unsigned int buttonRead = digitalRead(buttonPin);       // read from light sensor (photocell)
-        if(prevVal2 != buttonRead){
-            if(buttonRead == 0)
-                Device.Send("false", buttonPin);
-            else 
-                Device.Send("true", buttonPin);
-            prevVal2 = buttonRead;
-        }
-        timer = curTime;
-    }
-    Device.Process(); 
+   unsigned int buttonRead = digitalRead(buttonPin);       // read from light sensor (photocell)
+   if(prevVal != buttonRead){
+      if(buttonRead == 0)
+         Device.Send("false", buttonPin);
+       else 
+         Device.Send("true", buttonPin);
+         prevVal = buttonRead;
+       }
+   Device.Process(); 
 }
 
 
