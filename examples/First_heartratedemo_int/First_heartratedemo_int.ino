@@ -1,3 +1,17 @@
+/*
+   Copyright 2016 AllThingsTalk
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*/
+
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <PubSubClient.h>
 #include <ATT_IOT.h>              //AllThingsTalk IoT library
@@ -18,8 +32,8 @@
 
 
 ATTDevice Device(DEVICEID, CLIENTID, CLIENTKEY);            //create the object that provides the connection to the cloud to manage the device.
-char httpServer[] = "api.smartliving.io";                   // HTTP API Server host                  
-char mqttServer[] = "broker.smartliving.io";                // MQTT Server Address 
+char httpServer[] = "api.AllThingsTalk.io";                   // HTTP API Server host                  
+char mqttServer[] = "api.AllThingsTalk.io";                // MQTT Server Address 
 
 
 int heartRateId=0;                                          // identifies the asset on the cloud platform
